@@ -4,7 +4,9 @@ const router = express.Router();
 const requireAdmin = require('../middleware/requireAdmin');
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 const { Parser } = require('json2csv');
+const { notifyStudentStatusChange } = require('../utils/notify');
 
 // Helper: normalize status strings used in UI/DB
 const STATUS = {
@@ -73,7 +75,9 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
       q,
       page: pageNum,
       per: perNum,
-      officers
+      officers,
+      role: 'admin',
+      active: 'dashboard'
     });
   } catch (err) {
     console.error(err);
@@ -91,7 +95,7 @@ router.get('/complaints/:id', requireAdmin, async (req, res) => {
     if (!c) return res.status(404).send('Complaint not found');
     // ensure remarks array exists
     c.remarks = c.remarks || [];
-    res.render('admin-complaint-view', { complaint: c });
+    res.render('admin-complaint-view', { complaint: c, role: 'admin', active: 'dashboard' });
   } catch (err) {
     console.error(err);
     res.status(500).send('❌ ' + err.message);
@@ -102,10 +106,7 @@ router.get('/complaints/:id', requireAdmin, async (req, res) => {
 router.post('/assign', requireAdmin, async (req, res) => {
   try {
     const { id, assignedTo, assignedDepartment } = req.body;
-    const update = { assignedTo: assignedTo || null, assignedDepartment: assignedDepartment || null };
-    // push assignment history
     const adminName = req.session.user?.name || 'Admin';
-    update.$push = { history: { by: adminName, action: 'Assigned', assignedTo, assignedDepartment, at: new Date() } };
 
     // Note: findByIdAndUpdate ignores $push if update is not constructed properly; use two ops
     await Complaint.findByIdAndUpdate(id, { $set: { assignedTo: assignedTo || null, assignedDepartment: assignedDepartment || null }});
@@ -121,7 +122,16 @@ router.post('/assign', requireAdmin, async (req, res) => {
 router.post('/resolve', requireAdmin, async (req, res) => {
   try {
     const { id } = req.body;
-    await Complaint.findByIdAndUpdate(id, { status: STATUS.RESOLVED, resolvedAt: new Date(), $push: { history: { by: req.session.user.name, action: 'Resolved', at: new Date() } }});
+    const complaint = await Complaint.findByIdAndUpdate(
+      id,
+      { status: STATUS.RESOLVED, resolvedAt: new Date(), $push: { history: { by: req.session.user.name, action: 'Resolved', at: new Date() } } },
+      { new: true }
+    ).populate('student', 'email');
+
+    if (complaint) {
+      notifyStudentStatusChange(complaint, complaint.student?.email).catch(() => {});
+    }
+
     res.redirect('back');
   } catch (err) {
     console.error(err);
@@ -133,7 +143,16 @@ router.post('/resolve', requireAdmin, async (req, res) => {
 router.post('/escalate', requireAdmin, async (req, res) => {
   try {
     const { id } = req.body;
-    await Complaint.findByIdAndUpdate(id, { status: STATUS.ESCALATED, $push: { history: { by: req.session.user.name, action: 'Escalated', at: new Date() } }});
+    const complaint = await Complaint.findByIdAndUpdate(
+      id,
+      { status: STATUS.ESCALATED, escalatedAt: new Date(), $push: { history: { by: req.session.user.name, action: 'Escalated', at: new Date() } } },
+      { new: true }
+    ).populate('student', 'email');
+
+    if (complaint) {
+      notifyStudentStatusChange(complaint, complaint.student?.email).catch(() => {});
+    }
+
     res.redirect('back');
   } catch (err) {
     console.error(err);
@@ -159,7 +178,7 @@ router.post('/remark', requireAdmin, async (req, res) => {
 router.post('/delete', requireAdmin, async (req, res) => {
   try {
     const { id } = req.body;
-    await Complaint.findByIdAndUpdate(id, { deleted: true, deletedAt: new Date(), $push: { history: { by: req.session.user.name, action: 'Deleted', at: new Date() } }});
+    await Complaint.findByIdAndUpdate(id, { deleted: true, deletedAt: new Date(), $push: { history: { by: req.session.user.name, action: 'Deleted', at: new Date() } } });
     res.redirect('back');
   } catch (err) {
     console.error(err);
@@ -196,9 +215,46 @@ router.get('/analytics', requireAdmin, async (req, res) => {
       { $group: { _id: "$category", count: { $sum: 1 } } }
     ]);
 
+    // Complaints filed per day over the last 30 days
+    const trend = await Complaint.aggregate([
+      { $match: { deleted: { $ne: true }, createdAt: { $gte: new Date(Date.now() - 29 * 24 * 60 * 60 * 1000) } } },
+      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Average resolution time, overall and by category
+    const resolutionByCategory = await Complaint.aggregate([
+      { $match: { status: STATUS.RESOLVED, resolvedAt: { $ne: null } } },
+      { $project: { category: 1, hours: { $divide: [{ $subtract: ["$resolvedAt", "$createdAt"] }, 1000 * 60 * 60] } } },
+      { $group: { _id: "$category", avgHours: { $avg: "$hours" }, count: { $sum: 1 } } },
+      { $sort: { avgHours: 1 } }
+    ]);
+
+    const overallResolution = await Complaint.aggregate([
+      { $match: { status: STATUS.RESOLVED, resolvedAt: { $ne: null } } },
+      { $project: { hours: { $divide: [{ $subtract: ["$resolvedAt", "$createdAt"] }, 1000 * 60 * 60] } } },
+      { $group: { _id: null, avgHours: { $avg: "$hours" } } }
+    ]);
+
+    // Student satisfaction (feedback ratings)
+    const ratingStats = await Complaint.aggregate([
+      { $match: { "feedback.rating": { $exists: true, $ne: null } } },
+      { $group: { _id: null, avgRating: { $avg: "$feedback.rating" }, count: { $sum: 1 } } }
+    ]);
+
+    const totalComplaints = await Complaint.countDocuments({ deleted: { $ne: true } });
+
     res.render("admin-analytics", {
       statusCounts,
-      categoryCounts
+      categoryCounts,
+      trend,
+      resolutionByCategory,
+      avgResolutionHours: overallResolution[0]?.avgHours || null,
+      avgRating: ratingStats[0]?.avgRating || null,
+      ratingCount: ratingStats[0]?.count || 0,
+      totalComplaints,
+      role: 'admin',
+      active: 'analytics'
     });
 
   } catch (err) {
@@ -207,7 +263,57 @@ router.get('/analytics', requireAdmin, async (req, res) => {
   }
 });
 
+/* -------------------------------------------
+   USER MANAGEMENT (create staff accounts,
+   change roles, remove users)
+------------------------------------------- */
+router.get('/users', requireAdmin, async (req, res) => {
+  try {
+    const users = await User.find().sort({ role: 1, name: 1 }).lean();
+    res.render('admin-users', { users, role: 'admin', active: 'users', error: null });
+  } catch (err) {
+    res.status(500).send('❌ ' + err.message);
+  }
+});
+
+router.get('/users/new', requireAdmin, (req, res) => {
+  res.render('admin-user-new', { error: null, role: 'admin', active: 'users' });
+});
+
+router.post('/users/new', requireAdmin, async (req, res) => {
+  try {
+    const { name, email, password, role, department } = req.body;
+
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.render('admin-user-new', { error: 'A user with that email already exists.', role: 'admin', active: 'users' });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    await User.create({ name, email, password: hashed, role, department });
+
+    res.redirect('/admin/users');
+  } catch (err) {
+    res.render('admin-user-new', { error: err.message, role: 'admin', active: 'users' });
+  }
+});
+
+router.post('/users/:id/role', requireAdmin, async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.params.id, { role: req.body.role });
+    res.redirect('/admin/users');
+  } catch (err) {
+    res.status(500).send('❌ ' + err.message);
+  }
+});
+
+router.post('/users/:id/delete', requireAdmin, async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.redirect('/admin/users');
+  } catch (err) {
+    res.status(500).send('❌ ' + err.message);
+  }
+});
+
 module.exports = router;
-
-
-

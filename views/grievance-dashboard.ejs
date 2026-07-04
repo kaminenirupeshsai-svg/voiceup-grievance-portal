@@ -1,74 +1,59 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Grievance Cell Dashboard</title>
-  <link rel="stylesheet" href="/styles.css">
+  <title>Grievance Cell — VoiceUp</title>
+  <%- include('partials/head') %>
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <div class="brand">
-        <div class="logo">GC</div>
-        <div>
-          <div class="site-title">Grievance Cell</div>
-          <div style="font-size:13px;color:var(--muted)">Handle student complaints</div>
+  <div class="app-shell">
+    <%- include('partials/sidebar') %>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <h1>Grievance Queue</h1>
+        <div class="sub"><%= complaints.length %> awaiting action</div>
+      </header>
+
+      <div class="app-content">
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr><th>Ref</th><th>Title</th><th>Category</th><th>Student</th><th>Description</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <% if (complaints.length === 0) { %>
+                <tr><td colspan="7"><div class="empty-state"><i class="bi bi-inbox icon"></i><h4>Queue is empty</h4><p>Nothing needs your attention right now.</p></div></td></tr>
+              <% } %>
+              <% complaints.forEach(c => { %>
+                <tr>
+                  <td><%= c.referenceId %></td>
+                  <td><strong><%= c.title %></strong></td>
+                  <td><%= c.category %></td>
+                  <td><%= c.anonymous ? "Anonymous" : (c.student ? c.student.name : '—') %></td>
+                  <td style="max-width:260px"><span class="small"><%= (c.description||'').slice(0,90) %><%= c.description && c.description.length>90 ? '…' : '' %></span></td>
+                  <td>
+                    <% if (c.status === 'In Process') { %><span class="badge inprocess">In Process</span>
+                    <% } else { %><span class="badge pending">Pending</span><% } %>
+                  </td>
+                  <td>
+                    <div class="row" style="flex-wrap:wrap;gap:6px">
+                      <form method="POST" action="/grievance/review">
+                        <input type="hidden" name="id" value="<%= c._id %>">
+                        <button class="btn secondary small" type="submit">Review</button>
+                      </form>
+                      <form method="POST" action="/grievance/forward">
+                        <input type="hidden" name="id" value="<%= c._id %>">
+                        <button class="btn small" type="submit">Forward</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
         </div>
       </div>
-      <div class="actions">
-        <a href="/logout" class="btn secondary">Logout</a>
-      </div>
-    </header>
-
-    <div class="card">
-      <h3>Complaints Needing Grievance Action</h3>
-
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Ref</th>
-            <th>Title</th>
-            <th>Category</th>
-            <th>Student</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <% complaints.forEach(c => { %>
-            <tr>
-              <td><%= c.referenceId %></td>
-              <td><%= c.title %></td>
-              <td><%= c.category %></td>
-              <td><%= c.anonymous ? "Anonymous" : c.student?.name %></td>
-              <td><%= c.description %></td>
-              <td>
-                <span class="badge <%= c.status === 'Pending' ? 'pending' : 'inprocess' %>">
-                  <%= c.status %>
-                </span>
-              </td>
-
-              <td style="display:flex; gap:8px;">
-                <!-- Mark In Review -->
-                <form method="POST" action="/grievance/review">
-                  <input type="hidden" name="id" value="<%= c._id %>">
-                  <button class="btn small" type="submit">Review</button>
-                </form>
-
-                <!-- Forward to Admin -->
-                <form method="POST" action="/grievance/forward">
-                  <input type="hidden" name="id" value="<%= c._id %>">
-                  <button class="btn small primary" type="submit">Forward</button>
-                </form>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
+    </main>
   </div>
 </body>
 </html>
-

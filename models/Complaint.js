@@ -7,7 +7,15 @@ const ComplaintSchema = new mongoose.Schema({
   category: { type: String, required: true },
   priority: { type: String, default: 'Medium' },
   anonymous: { type: Boolean, default: false },
-  attachment: { type: String, default: null },
+
+  attachments: [
+    {
+      filename: String,       // stored name on disk
+      originalName: String,   // name as uploaded by the user
+      mimeType: String,
+      size: Number
+    }
+  ],
 
   student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 
@@ -51,6 +59,17 @@ const ComplaintSchema = new mongoose.Schema({
       at: { type: Date, default: Date.now }
     }
   ],
+
+  // STUDENT FEEDBACK (only after resolution)
+  feedback: {
+    rating: { type: Number, min: 1, max: 5 },
+    comment: { type: String },
+    submittedAt: { type: Date }
+  },
+
+  // SOFT DELETE
+  deleted: { type: Boolean, default: false },
+  deletedAt: { type: Date, default: null },
 
 }, { timestamps: true });
 

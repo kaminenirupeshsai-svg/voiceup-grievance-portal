@@ -1,20 +1,20 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>Admin Login — VoiceUp</title>
+  <title>Grievance Officer Login — VoiceUp</title>
   <%- include('partials/head') %>
 </head>
 <body>
   <div class="auth-shell">
     <div class="auth-card">
-      <div class="auth-icon" style="background:#dc2626"><i class="bi bi-shield-lock"></i></div>
-      <h2>Admin Login</h2>
-      <p class="lead">Manage complaints, assignments & analytics</p>
+      <div class="auth-icon"><i class="bi bi-person-badge"></i></div>
+      <h2>Grievance Officer Login</h2>
+      <p class="lead">Manage escalated complaints assigned to you</p>
 
-      <form method="POST" action="/auth/login-admin">
+      <form method="POST" action="/auth/login-officer">
         <div class="form-row">
           <label>Email</label>
-          <input name="email" type="email" placeholder="admin@college.edu" required>
+          <input name="email" type="email" placeholder="officer@college.edu" required>
         </div>
         <div class="form-row">
           <label>Password</label>

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Complaint = require('../models/Complaint');
+const upload = require('../middleware/upload');
+const { notifyAdminsNewComplaint } = require('../utils/notify');
 
 // middleware: must be logged in
 function requireLogin(req, res, next) {
@@ -8,19 +10,34 @@ function requireLogin(req, res, next) {
   next();
 }
 
+// Lodge Complaint Page
+router.get('/new', requireLogin, (req, res) => {
+  res.render('lodge-complaint', { role: 'student', active: 'lodge' });
+});
+
 // Create complaint
-router.post('/create', requireLogin, async (req, res) => {
+router.post('/create', requireLogin, upload.array('attachments', 3), async (req, res) => {
   try {
     const { title, description, category, priority, anonymous } = req.body;
 
-    await Complaint.create({
+    const attachments = (req.files || []).map(f => ({
+      filename: f.filename,
+      originalName: f.originalname,
+      mimeType: f.mimetype,
+      size: f.size
+    }));
+
+    const complaint = await Complaint.create({
       title,
       description,
       category,
       priority,
       anonymous: !!anonymous,
-      student: req.session.user.id
+      student: req.session.user.id,
+      attachments
     });
+
+    notifyAdminsNewComplaint(complaint).catch(() => {});
 
     res.redirect('/complaint/history');
 
@@ -36,9 +53,23 @@ router.get('/history', requireLogin, async (req, res) => {
       student: req.session.user.id
     }).sort({ createdAt: -1 });
 
-    res.render('history', { complaints });
+    res.render('history', { complaints, role: 'student', active: 'history' });
   } catch (err) {
     res.send("❌ Error: " + err.message);
+  }
+});
+
+// Submit feedback/rating for a resolved complaint
+router.post('/feedback/:id', requireLogin, async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    await Complaint.findOneAndUpdate(
+      { _id: req.params.id, student: req.session.user.id, status: 'Resolved' },
+      { feedback: { rating: Number(rating), comment, submittedAt: new Date() } }
+    );
+    res.redirect('/complaint/history');
+  } catch (err) {
+    res.send("❌ Error submitting feedback: " + err.message);
   }
 });
 
@@ -72,7 +103,7 @@ router.post('/quick', requireLogin, async (req, res) => {
       ]
     }).sort({ createdAt: -1 });
 
-    res.render('history', { complaints });
+    res.render('history', { complaints, role: 'student', active: 'history' });
 
   } catch (err) {
     res.send("❌ Quick Search Error: " + err.message);
@@ -88,7 +119,7 @@ router.post('/quick-lodge', requireLogin, async (req, res) => {
       return res.send("❌ Complaint text cannot be empty.");
     }
 
-    await Complaint.create({
+    const complaint = await Complaint.create({
       title: short.substring(0, 40),
       description: short,
       category: "General",
@@ -96,6 +127,8 @@ router.post('/quick-lodge', requireLogin, async (req, res) => {
       anonymous: true,
       student: req.session.user.id
     });
+
+    notifyAdminsNewComplaint(complaint).catch(() => {});
 
     res.redirect('/complaint/history');
 
@@ -105,6 +138,3 @@ router.post('/quick-lodge', requireLogin, async (req, res) => {
 });
 
 module.exports = router;
-
-
-

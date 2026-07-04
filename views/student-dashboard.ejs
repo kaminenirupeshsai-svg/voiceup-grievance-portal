@@ -1,56 +1,86 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Student Dashboard</title>
-  <link rel="stylesheet" href="/styles.css">
+  <title>Dashboard — VoiceUp</title>
+  <%- include('partials/head') %>
 </head>
 <body>
-<div class="container">
-  <header class="header">
-    <div class="brand">
-      <div class="logo">EG</div>
-      <div>
-        <div class="site-title">E-Grievance Portal</div>
-        <div style="font-size:13px;color:gray">Welcome, Student</div>
-      </div>
-    </div>
-    <div class="actions">
-      <a href="/logout" class="btn secondary">Logout</a>
-    </div>
-  </header>
+  <div class="app-shell">
+    <%- include('partials/sidebar') %>
 
-  <div class="grid-3">
-    <aside class="card sidebar">
-      <div class="menu-item active">Dashboard</div>
-      <a href="/lodge-complaint.html" class="menu-item">Lodge Complaint</a>
-      <a href="/complaint/history" class="menu-item">Complaint History</a>
-      <a href="/auth/account" class="menu-item">Account Settings</a>
-    </aside>
-    <section class="card">
-      <h3>Recent Complaints</h3>
+    <main class="app-main">
+      <header class="app-topbar">
+        <h1>Dashboard</h1>
+        <div class="sub">Welcome back, <%= (typeof user !== 'undefined' && user) ? user.name : 'Student' %></div>
+      </header>
 
-      <% if (complaints.length === 0) { %>
-        <p style="color:gray">No complaints yet.</p>
-      <% } %>
-
-      <% complaints.forEach(c => { %>
-        <div class="complaint">
-          <div style="flex:1">
-            <div style="font-weight:700"><%= c.title %></div>
-            <div style="color:gray;font-size:13px">
-              <%= c.category %> — <%= c.createdAt.toLocaleDateString() %>
-            </div>
+      <div class="app-content">
+        <div class="stat-grid">
+          <div class="stat-tile">
+            <div class="stat-label"><span class="stat-icon"><i class="bi bi-folder2-open"></i></span>Total Filed</div>
+            <div class="stat-value"><%= totalCount %></div>
           </div>
-          <div>
-            <div class="badge"><%= c.status %></div>
+          <div class="stat-tile">
+            <div class="stat-label"><span class="stat-icon" style="background:var(--pending-bg);color:var(--pending-fg)"><i class="bi bi-hourglass-split"></i></span>In Progress</div>
+            <div class="stat-value"><%= pendingCount %></div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-label"><span class="stat-icon" style="background:var(--resolved-bg);color:var(--resolved-fg)"><i class="bi bi-check-circle"></i></span>Resolved</div>
+            <div class="stat-value"><%= resolvedCount %></div>
           </div>
         </div>
-      <% }) %>
 
-    </section>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Complaints</h3>
+              <a href="/complaint/history" class="btn ghost small">View all <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            <% if (complaints.length === 0) { %>
+              <div class="empty-state">
+                <i class="bi bi-inbox icon"></i>
+                <h4>No complaints yet</h4>
+                <p>When you lodge a complaint, it'll show up here.</p>
+              </div>
+            <% } %>
+
+            <% complaints.forEach(c => { %>
+              <div class="complaint-item">
+                <div>
+                  <div class="title"><%= c.title %></div>
+                  <div class="meta"><%= c.category %> — <%= new Date(c.createdAt).toLocaleDateString() %></div>
+                </div>
+                <div>
+                  <% if (c.status === 'Resolved') { %><span class="badge resolved">Resolved</span>
+                  <% } else if (c.status === 'In Process') { %><span class="badge inprocess">In Process</span>
+                  <% } else if (c.status === 'Escalated') { %><span class="badge escalated">Escalated</span>
+                  <% } else { %><span class="badge pending">Pending</span><% } %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+
+          <div>
+            <div class="card">
+              <h3>Quick Actions</h3>
+              <a href="/complaint/new" class="btn" style="width:100%;margin-bottom:10px"><i class="bi bi-pencil-square"></i> Lodge Complaint</a>
+              <a href="/complaint/history" class="btn secondary" style="width:100%;margin-bottom:10px"><i class="bi bi-clock-history"></i> View History</a>
+              <a href="/auth/account" class="btn secondary" style="width:100%"><i class="bi bi-person-gear"></i> Account Settings</a>
+            </div>
+
+            <div class="card" style="margin-top:16px">
+              <h3>Quick Lodge</h3>
+              <p class="muted small" style="margin-top:-8px;margin-bottom:10px">Submit a short anonymous complaint in one step.</p>
+              <form method="POST" action="/complaint/quick-lodge">
+                <textarea name="short" placeholder="Type a short complaint..." required style="min-height:80px"></textarea>
+                <button class="btn" type="submit" style="width:100%;margin-top:10px">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
-</div>
-
 </body>
 </html>

@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Complaint = require("../models/Complaint");
+const requireRole = require("../middleware/requireRole");
+const { notifyStudentStatusChange } = require("../utils/notify");
+
+router.use(requireRole("officer"));
 
 // Officer Dashboard – Complaints forwarded from Grievance Officer
 router.get("/dashboard", async (req, res) => {
@@ -9,7 +13,7 @@ router.get("/dashboard", async (req, res) => {
       status: "Escalated"
     }).populate("student", "name email").sort({ createdAt: -1 });
 
-    res.render("officer-dashboard", { complaints });
+    res.render("officer-dashboard", { complaints, role: "officer", active: "dashboard" });
   } catch (error) {
     res.send("❌ Error loading officer dashboard: " + error.message);
   }
@@ -50,10 +54,16 @@ router.post("/remark", async (req, res) => {
 // Mark complaint as resolved
 router.post("/resolve", async (req, res) => {
   try {
-    await Complaint.findByIdAndUpdate(req.body.id, {
-      status: "Resolved",
-      resolvedAt: new Date()
-    });
+    const complaint = await Complaint.findByIdAndUpdate(
+      req.body.id,
+      { status: "Resolved", resolvedAt: new Date() },
+      { new: true }
+    ).populate("student", "email");
+
+    if (complaint) {
+      notifyStudentStatusChange(complaint, complaint.student?.email).catch(() => {});
+    }
+
     res.redirect("/officer/dashboard");
   } catch (error) {
     res.send("❌ Error resolving complaint: " + error.message);
@@ -67,7 +77,7 @@ router.get("/history", async (req, res) => {
       status: "Resolved"
     }).populate("student", "name email").sort({ updatedAt: -1 });
 
-    res.render("officer-history", { complaints });
+    res.render("officer-history", { complaints, role: "officer", active: "history" });
   } catch (err) {
     res.send("❌ Error loading history: " + err.message);
   }

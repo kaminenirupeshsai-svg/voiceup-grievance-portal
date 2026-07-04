@@ -1,46 +1,53 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Admin - Users</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <title>Manage Users — VoiceUp</title>
+  <%- include('partials/head') %>
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <h1>Manage Users</h1>
-      <a href="/admin/dashboard" class="btn">Back</a>
-    </header>
+  <div class="app-shell">
+    <%- include('partials/sidebar') %>
 
-    <div class="card">
-      <a href="/admin/users/new" class="btn">Create New User</a>
-      <table class="table" style="margin-top:12px">
-        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
-        <tbody>
-          <% users.forEach(u => { %>
-            <tr>
-              <td><%= u.name %></td>
-              <td><%= u.email %></td>
-              <td><%= u.role %></td>
-              <td>
-                <form method="POST" action="/admin/users/<%= u._id %>/role" style="display:inline">
-                  <select name="role">
-                    <option value="student" <%= u.role==='student'?'selected':'' %>>Student</option>
-                    <option value="officer" <%= u.role==='officer'?'selected':'' %>>Officer</option>
-                    <option value="admin" <%= u.role==='admin'?'selected':'' %>>Admin</option>
-                  </select>
-                  <button class="btn">Change</button>
-                </form>
+    <main class="app-main">
+      <header class="app-topbar">
+        <h1>Manage Users</h1>
+        <a href="/admin/users/new" class="btn small"><i class="bi bi-person-plus"></i> Create New User</a>
+      </header>
 
-                <form method="POST" action="/admin/users/<%= u._id %>/delete" style="display:inline" onsubmit="return confirm('Delete user?')">
-                  <button class="btn" style="background:#e74c3c;color:#fff">Delete</button>
-                </form>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
+      <div class="app-content">
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+            <tbody>
+              <% users.forEach(u => { %>
+                <tr>
+                  <td><%= u.name %></td>
+                  <td><%= u.email %></td>
+                  <td><span class="badge neutral"><%= u.role %></span></td>
+                  <td>
+                    <div class="row" style="flex-wrap:wrap;gap:8px">
+                      <form method="POST" action="/admin/users/<%= u._id %>/role" style="display:flex;gap:6px">
+                        <select name="role">
+                          <option value="student" <%= u.role==='student'?'selected':'' %>>Student</option>
+                          <option value="grievance" <%= u.role==='grievance'?'selected':'' %>>Grievance Cell</option>
+                          <option value="officer" <%= u.role==='officer'?'selected':'' %>>Officer</option>
+                          <option value="admin" <%= u.role==='admin'?'selected':'' %>>Admin</option>
+                        </select>
+                        <button class="btn secondary small">Change</button>
+                      </form>
+
+                      <form method="POST" action="/admin/users/<%= u._id %>/delete" style="display:inline" onsubmit="return confirm('Delete this user?')">
+                        <button class="btn danger small"><i class="bi bi-trash3"></i></button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
   </div>
 </body>
 </html>

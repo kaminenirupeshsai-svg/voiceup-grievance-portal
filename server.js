@@ -16,6 +16,7 @@ const PORT = process.env.PORT || 5000;
    🔹 1. STATIC FILES
 ============================================ */
 app.use(express.static(path.join(__dirname, "public")));   // SERVES HTML FILES
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));   // COMPLAINT ATTACHMENTS
 
 /* ============================================
    🔹 2. EJS VIEWS

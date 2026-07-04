@@ -93,13 +93,35 @@ router.post("/login-grievance", async (req, res) => {
 });
 
 /* -------------------------------------------
+   GRIEVANCE OFFICER LOGIN
+------------------------------------------- */
+router.post("/login-officer", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email, role: "officer" });
+  if (!user) return res.send("❌ Officer not found");
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return res.send("❌ Invalid password");
+
+  req.session.user = {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role
+  };
+
+  res.redirect("/officer/dashboard");
+});
+
+/* -------------------------------------------
    ACCOUNT SETTINGS
 ------------------------------------------- */
 router.get("/account", async (req, res) => {
   if (!req.session.user) return res.redirect("/student-login");
 
   const user = await User.findById(req.session.user.id || req.session.user._id);
-  res.render("account", { user });
+  res.render("account", { user, role: "student", active: "account" });
 });
 
 router.post("/update-profile", async (req, res) => {
@@ -130,7 +152,11 @@ router.post("/update-profile", async (req, res) => {
 ------------------------------------------- */
 router.post("/register", async (req, res) => {
   try {
-    const { name, roll, email, department, password } = req.body;
+    const { name, roll, email, department, password, confirm_password } = req.body;
+
+    if (confirm_password !== undefined && password !== confirm_password) {
+      return res.send("❌ Passwords do not match");
+    }
 
     const exists = await User.findOne({ email });
     if (exists) return res.send("❌ User already exists");

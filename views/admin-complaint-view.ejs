@@ -1,90 +1,104 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Complaint - <%= complaint.title %></title>
-  <link rel="stylesheet" href="/styles.css" />
-  <style>
-    .label { font-weight:600; }
-    .box { padding:12px; border-radius:8px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:12px; }
-    .timeline { border-left: 3px solid #eee; padding-left:12px; }
-    .timeline-item { margin-bottom:12px; }
-    .muted { color:#666; font-size:13px }
-  </style>
+  <title>Complaint <%= complaint.referenceId %> — VoiceUp</title>
+  <%- include('partials/head') %>
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <h2>Complaint Details</h2>
-      <a href="/admin/dashboard" class="btn">Back to Dashboard</a>
-    </header>
+  <div class="app-shell">
+    <%- include('partials/sidebar') %>
 
-    <div style="margin-top:16px;">
-      <div class="box">
-        <h3><%= complaint.title %></h3>
-        <div class="muted">Ref: <%= complaint.referenceId || complaint._id %> &nbsp; | &nbsp; <%= new Date(complaint.createdAt).toLocaleString() %></div>
-        <p style="margin-top:10px;"><%= complaint.description %></p>
+    <main class="app-main">
+      <header class="app-topbar">
+        <h1>Complaint Detail</h1>
+        <a href="/admin/dashboard" class="btn secondary small"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+      </header>
 
-        <p><span class="label">Category:</span> <%= complaint.category || '—' %></p>
-        <p><span class="label">Status:</span> <%= complaint.status %></p>
-        <p><span class="label">Assigned:</span> <%= complaint.assignedTo ? complaint.assignedTo.name : (complaint.assignedDepartment || '—') %></p>
-
-        <% if (complaint.attachments && complaint.attachments.length) { %>
-          <div>
-            <span class="label">Attachments:</span>
-            <ul>
-              <% complaint.attachments.forEach(a => { %>
-                <li><a href="/uploads/<%= a.path %>" target="_blank"><%= a.originalName %></a></li>
-              <% }) %>
-            </ul>
+      <div class="app-content" style="max-width:820px">
+        <div class="card">
+          <div class="spread">
+            <h3 style="margin:0"><%= complaint.title %></h3>
+            <% if (complaint.status === 'Resolved') { %><span class="badge resolved">Resolved</span>
+            <% } else if (complaint.status === 'In Process') { %><span class="badge inprocess">In Process</span>
+            <% } else if (complaint.status === 'Escalated') { %><span class="badge escalated">Escalated</span>
+            <% } else { %><span class="badge pending">Pending</span><% } %>
           </div>
-        <% } %>
-      </div>
+          <div class="muted small" style="margin-top:6px">Ref: <%= complaint.referenceId || complaint._id %> &nbsp;|&nbsp; <%= new Date(complaint.createdAt).toLocaleString() %></div>
 
-      <!-- Remark form -->
-      <div class="box">
-        <h4>Add Remark</h4>
-        <form method="POST" action="/admin/remark">
-          <input type="hidden" name="id" value="<%= complaint._id %>">
-          <textarea name="remark" rows="4" style="width:100%;padding:8px" placeholder="Type remark (visible to student/officer as configured)"></textarea>
-          <div style="margin-top:8px">
-            <button class="btn">Add Remark</button>
-            <form method="POST" action="/admin/resolve" style="display:inline">
-              <input type="hidden" name="id" value="<%= complaint._id %>">
-              <button class="btn" style="margin-left:8px">Resolve</button>
-            </form>
+          <p style="margin-top:14px"><%= complaint.description %></p>
+
+          <div class="row" style="flex-wrap:wrap;gap:24px;margin-top:14px">
+            <div><span class="small muted">Category</span><div><%= complaint.category || '—' %></div></div>
+            <div><span class="small muted">Priority</span><div><%= complaint.priority || '—' %></div></div>
+            <div><span class="small muted">Student</span><div><%= complaint.anonymous ? 'Anonymous' : (complaint.student ? complaint.student.name : '—') %></div></div>
+            <div><span class="small muted">Assigned</span><div><%= complaint.assignedTo ? complaint.assignedTo.name : (complaint.assignedDepartment || '—') %></div></div>
           </div>
-        </form>
-      </div>
 
-      <!-- Timeline -->
-      <div class="box">
-        <h4>Timeline & Remarks</h4>
-        <div class="timeline">
-          <% if (complaint.history && complaint.history.length) { %>
-            <% complaint.history.forEach(h => { %>
-              <div class="timeline-item">
-                <div><strong><%= h.by %></strong> <span class="muted"> - <%= h.action %> at <%= new Date(h.at).toLocaleString() %></span></div>
-                <% if (h.note) { %><div style="margin-top:6px;"><%= h.note %></div><% } %>
+          <% if (complaint.attachments && complaint.attachments.length) { %>
+            <div style="margin-top:16px">
+              <span class="small muted">Attachments</span>
+              <div class="file-chip-list">
+                <% complaint.attachments.forEach(a => { %>
+                  <a class="file-chip" href="/uploads/<%= a.filename %>" target="_blank"><i class="bi bi-paperclip"></i> <%= a.originalName %></a>
+                <% }) %>
               </div>
-            <% }) %>
+            </div>
           <% } %>
 
-          <% if (complaint.remarks && complaint.remarks.length) { %>
-            <% complaint.remarks.forEach(r => { %>
-              <div class="timeline-item">
-                <div><strong><%= r.by %></strong> <span class="muted"> - remark at <%= new Date(r.at).toLocaleString() %></span></div>
-                <div style="margin-top:6px;"><%= r.text %></div>
+          <% if (complaint.feedback && complaint.feedback.rating) { %>
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-soft)">
+              <span class="small muted">Student Feedback</span>
+              <div class="star-rating readonly" style="margin-top:4px">
+                <% for (let i = 1; i <= 5; i++) { %><span class="star <%= i <= complaint.feedback.rating ? 'filled' : '' %>">★</span><% } %>
               </div>
-            <% }) %>
-          <% } %>
-
-          <% if ((!complaint.history || !complaint.history.length) && (!complaint.remarks || !complaint.remarks.length)) { %>
-            <div class="muted">No history or remarks yet</div>
+              <% if (complaint.feedback.comment) { %><p class="small muted" style="margin-top:6px">“<%= complaint.feedback.comment %>”</p><% } %>
+            </div>
           <% } %>
         </div>
+
+        <div class="card" style="margin-top:16px">
+          <h4>Add Remark</h4>
+          <form method="POST" action="/admin/remark">
+            <input type="hidden" name="id" value="<%= complaint._id %>">
+            <textarea name="remark" placeholder="Type remark (visible to student/officer as configured)"></textarea>
+            <div class="row" style="margin-top:10px">
+              <button class="btn" type="submit">Add Remark</button>
+              <form method="POST" action="/admin/resolve" style="display:inline">
+                <input type="hidden" name="id" value="<%= complaint._id %>">
+                <button class="btn secondary" type="submit">Mark Resolved</button>
+              </form>
+            </div>
+          </form>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h4>Timeline &amp; Remarks</h4>
+          <div class="timeline">
+            <% if (complaint.history && complaint.history.length) { %>
+              <% complaint.history.slice().reverse().forEach(h => { %>
+                <div class="timeline-item">
+                  <div><strong><%= h.by %></strong> <span class="muted small"> — <%= h.action %> at <%= new Date(h.at).toLocaleString() %></span></div>
+                  <% if (h.note) { %><div style="margin-top:4px;font-size:14px"><%= h.note %></div><% } %>
+                </div>
+              <% }) %>
+            <% } %>
+
+            <% if (complaint.remarks && complaint.remarks.length) { %>
+              <% complaint.remarks.slice().reverse().forEach(r => { %>
+                <div class="timeline-item">
+                  <div><strong><%= r.by %></strong> <span class="muted small"> — remark at <%= new Date(r.at).toLocaleString() %></span></div>
+                  <div style="margin-top:4px;font-size:14px"><%= r.text %></div>
+                </div>
+              <% }) %>
+            <% } %>
+
+            <% if ((!complaint.history || !complaint.history.length) && (!complaint.remarks || !complaint.remarks.length)) { %>
+              <div class="muted small">No history or remarks yet</div>
+            <% } %>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 </body>
 </html>

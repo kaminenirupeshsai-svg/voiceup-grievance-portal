@@ -11,3 +11,7 @@ yarn-error.log
 
 # Optional: OS files
 .DS_Store
+
+# Uploaded complaint attachments (user content, not source)
+uploads/*
+!uploads/.gitkeep

@@ -3,14 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Register — E-Grievance Portal</title>
+  <title>Register — VoiceUp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    (function () {
+      var t = localStorage.getItem("theme");
+      if (t) document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
 </head>
 <body>
-  <div class="container">
-    <div class="card" style="max-width:700px;margin:auto">
+  <div class="auth-shell">
+    <div class="auth-card" style="max-width:560px">
+      <div class="auth-icon"><i class="bi bi-person-plus"></i></div>
       <h2>Create Student Account</h2>
-     <form method="POST" action="/auth/register">
+      <p class="lead">Register to submit and track your grievances</p>
+
+      <form method="POST" action="/auth/register" id="registerForm">
         <div class="form-grid">
           <div>
             <div class="form-row">
@@ -42,12 +54,22 @@
           </div>
         </div>
 
-        <div style="margin-top:12px">
-          <button class="btn" type="submit">Register</button>
-          <a href="index.html" class="btn secondary" style="margin-left:8px">Back to Login</a>
-        </div>
+        <button class="btn" type="submit">Create Account</button>
       </form>
+
+      <a href="/" class="auth-back">← Back to Home</a>
     </div>
   </div>
+
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", function (e) {
+      var pass = document.getElementById("password").value;
+      var confirm = document.getElementById("confirm").value;
+      if (pass !== confirm) {
+        e.preventDefault();
+        alert("Passwords do not match.");
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,56 @@
+<%
+const NAV = {
+  student: [
+    { href: "/dashboard", icon: "bi-speedometer2", label: "Dashboard", key: "dashboard" },
+    { href: "/complaint/new", icon: "bi-pencil-square", label: "Lodge Complaint", key: "lodge" },
+    { href: "/complaint/history", icon: "bi-clock-history", label: "Complaint History", key: "history" },
+    { href: "/auth/account", icon: "bi-person-gear", label: "Account Settings", key: "account" }
+  ],
+  admin: [
+    { href: "/admin/dashboard", icon: "bi-kanban", label: "All Complaints", key: "dashboard" },
+    { href: "/admin/analytics", icon: "bi-graph-up-arrow", label: "Analytics", key: "analytics" },
+    { href: "/admin/users", icon: "bi-people", label: "Manage Users", key: "users" },
+    { href: "/admin/export/csv", icon: "bi-download", label: "Export CSV", key: "export" }
+  ],
+  grievance: [
+    { href: "/grievance/dashboard", icon: "bi-inboxes", label: "Grievance Queue", key: "dashboard" }
+  ],
+  officer: [
+    { href: "/officer/dashboard", icon: "bi-kanban", label: "Escalated Queue", key: "dashboard" },
+    { href: "/officer/history", icon: "bi-clock-history", label: "Resolved History", key: "history" }
+  ]
+};
+const navItems = NAV[typeof role !== "undefined" ? role : ""] || [];
+const activeKey = typeof active !== "undefined" ? active : "";
+%>
+<aside class="app-sidebar">
+  <div class="side-brand">
+    <span style="width:32px;height:32px;border-radius:9px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">EG</span>
+    VoiceUp
+  </div>
+  <nav>
+    <% navItems.forEach(function (it) { %>
+      <a href="<%= it.href %>" class="side-link <%= activeKey === it.key ? 'active' : '' %>">
+        <i class="bi <%= it.icon %>"></i><%= it.label %>
+      </a>
+    <% }) %>
+  </nav>
+  <div class="side-foot">
+    <button class="btn-icon" id="themeToggle" type="button" title="Toggle dark mode" style="margin-bottom:10px">
+      <i class="bi bi-moon-stars"></i>
+    </button>
+    <a href="/logout" class="side-link"><i class="bi bi-box-arrow-right"></i>Logout</a>
+  </div>
+</aside>
+<script>
+  (function () {
+    var btn = document.getElementById("themeToggle");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var cur = document.documentElement.getAttribute("data-theme");
+      var next = cur === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    });
+  })();
+</script>

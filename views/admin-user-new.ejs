@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Create User — Admin</title>
+  <%- include('partials/head') %>
+</head>
+<body>
+  <div class="app-shell">
+    <%- include('partials/sidebar') %>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <h1>Create Staff Account</h1>
+        <a href="/admin/users" class="btn secondary small"><i class="bi bi-arrow-left"></i> Back to Users</a>
+      </header>
+
+      <div class="app-content" style="max-width:560px">
+        <div class="card">
+          <% if (typeof error !== "undefined" && error) { %>
+            <div class="detail-row" style="color:#dc2626;border:none;padding-top:0;">⚠ <%= error %></div>
+          <% } %>
+
+          <form method="POST" action="/admin/users/new">
+            <div class="form-row">
+              <label>Full name</label>
+              <input name="name" type="text" required>
+            </div>
+            <div class="form-row">
+              <label>Email</label>
+              <input name="email" type="email" required>
+            </div>
+            <div class="form-row">
+              <label>Department (optional)</label>
+              <input name="department" type="text" placeholder="e.g. Hostel, Academics">
+            </div>
+            <div class="form-row">
+              <label>Role</label>
+              <select name="role" required>
+                <option value="admin">Admin</option>
+                <option value="grievance">Grievance Cell</option>
+                <option value="officer">Grievance Officer</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Temporary password</label>
+              <input name="password" type="password" required minlength="6">
+            </div>
+            <button class="btn" type="submit"><i class="bi bi-person-plus"></i> Create Account</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

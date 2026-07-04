@@ -1,66 +1,54 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>Account Settings</title>
-  <style>
-    body { font-family: Arial; background:#f5f7fb; padding:20px; }
-    .card { max-width:600px; margin:auto; background:white; padding:25px;
-            border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-    .form-row { margin-bottom:12px; }
-    label { font-weight:bold; display:block; margin-bottom:6px; }
-    input {
-      width:100%; padding:10px; border-radius:6px;
-      border:1px solid #ccc; font-size:15px;
-    }
-    .btn { background:#0066ff; color:white; padding:10px 15px;
-           border:none; border-radius:6px; cursor:pointer; }
-    .btn.secondary { background:#ddd; color:#333; margin-left:6px; }
-  </style>
+  <title>Account Settings — VoiceUp</title>
+  <%- include('partials/head') %>
 </head>
 <body>
+  <div class="app-shell">
+    <%- include('partials/sidebar') %>
 
-<a href="/dashboard">Back</a>
+    <main class="app-main">
+      <header class="app-topbar">
+        <h1>Account Settings</h1>
+        <div class="sub">Update your profile details</div>
+      </header>
 
-<div class="card">
-  <h2>Account Settings</h2>
+      <div class="app-content" style="max-width:560px">
+        <div class="card">
+          <form method="POST" action="/auth/update-profile">
+            <div class="form-row">
+              <label>Name</label>
+              <input type="text" name="name" value="<%= user.name %>" required>
+            </div>
 
-  <form method="POST" action="/auth/update-profile">
+            <div class="form-row">
+              <label>Roll Number</label>
+              <input type="text" value="<%= user.roll %>" disabled>
+              <div class="help-text">Roll number cannot be changed.</div>
+            </div>
 
-    <div class="form-row">
-      <label>Name</label>
-      <input type="text" name="name" value="<%= user.name %>" required>
-    </div>
+            <div class="form-row">
+              <label>Department</label>
+              <input type="text" name="department" value="<%= user.department %>" required>
+            </div>
 
-    <div class="form-row">
-      <label>Roll Number</label>
-      <input type="text" value="<%= user.roll %>" disabled>
-    </div>
+            <div class="form-row">
+              <label>Email</label>
+              <input type="email" name="email" value="<%= user.email %>" required>
+            </div>
 
-    <div class="form-row">
-      <label>Department</label>
-      <input type="text" name="department" value="<%= user.department %>" required>
-    </div>
+            <div class="form-row">
+              <label>Change Password (optional)</label>
+              <input type="password" name="password" placeholder="Leave blank if unchanged">
+            </div>
 
-    <div class="form-row">
-      <label>Email</label>
-      <input type="email" name="email" value="<%= user.email %>" required>
-    </div>
-
-    <div class="form-row">
-      <label>Change Password (optional)</label>
-      <input type="password" name="password" placeholder="Leave blank if unchanged">
-    </div>
-
-    <button class="btn" type="submit">Update Profile</button>
-    <a class="btn secondary" href="/dashboard">Cancel</a>
-
-  </form>
-</div>
-
+            <button class="btn" type="submit"><i class="bi bi-check-lg"></i> Update Profile</button>
+            <a class="btn secondary" href="/dashboard">Cancel</a>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
-
-
-
-
-
