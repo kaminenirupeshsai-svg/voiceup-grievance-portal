@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lodge Complaint — E-Grievance Portal</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">EG</div>
+        <div>
+          <div class="site-title">Lodge Complaint</div>
+          <div style="font-size:13px;color:var(--muted)">You can submit anonymously</div>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="student-dashboard.html" class="btn secondary">Back</a>
+      </div>
+    </div>
+
+    <main class="card" style="max-width:900px;margin:auto">
+     <form method="POST" action="/complaint/create">
+
+        <div class="form-grid">
+          <div>
+            <div class="form-row">
+              <label for="title">Complaint Title</label>
+              <input id="title" name="title" type="text" placeholder="Short descriptive title" required>
+            </div>
+
+            <div class="form-row">
+              <label for="category">Category</label>
+              <select id="category" name="category" required>
+                <option value="">-- Select --</option>
+                <option>Academic</option>
+                <option>Infrastructure</option>
+                <option>Administrative</option>
+                <option>Harassment</option>
+                <option>Hostel</option>
+                <option>Others</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="attach">Attach file (optional)</label>
+            </div>
+
+            <div style="margin-top:12px">
+              <label><input type="checkbox" name="anonymous" value="true"> Submit anonymously</label>
+            </div>
+          </div>
+
+          <div>
+            <div class="form-row">
+              <label for="desc">Detailed Description</label>
+              <textarea id="desc" name="description" placeholder="Describe the issue with details and evidence (if any)" required></textarea>
+            </div>
+
+            <div class="form-row">
+              <label for="priority">Priority</label>
+              <select id="priority" name="priority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+
+            <div style="margin-top:12px">
+              <button class="btn" type="submit">Submit Complaint</button>
+              <a href="student-dashboard.html" class="btn secondary" style="margin-left:8px">Cancel</a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <div class="brand">
+      <div class="logo">EG</div>
+      <div>
+        <div class="site-title">E-Grievance Portal</div>
+        <div style="font-size:13px;color:gray">Welcome, Student</div>
+      </div>
+    </div>
+    <div class="actions">
+      <a href="/logout" class="btn secondary">Logout</a>
+    </div>
+  </header>
+
+  <div class="grid-3">
+    <aside class="card sidebar">
+      <div class="menu-item active">Dashboard</div>
+      <a href="/lodge-complaint.html" class="menu-item">Lodge Complaint</a>
+      <a href="/complaint/history" class="menu-item">Complaint History</a>
+    </aside>
+    <section class="card">
+      <h3>Recent Complaints</h3>
+
+      <% if (complaints.length === 0) { %>
+        <p style="color:gray">No complaints yet.</p>
+      <% } %>
+
+      <% complaints.forEach(c => { %>
+        <div class="complaint">
+          <div style="flex:1">
+            <div style="font-weight:700"><%= c.title %></div>
+            <div style="color:gray;font-size:13px">
+              <%= c.category %> — <%= c.createdAt.toLocaleDateString() %>
+            </div>
+          </div>
+          <div>
+            <div class="badge"><%= c.status %></div>
+          </div>
+        </div>
+      <% }) %>
+
+    </section>
+  </div>
+</div>
+
+</body>
+</html>

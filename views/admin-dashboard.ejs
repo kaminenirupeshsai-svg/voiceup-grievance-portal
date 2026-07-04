@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .cards { display:flex; gap:15px; margin-bottom:20px; }
+    .card-small { padding:16px; border-radius:10px; background:#fff; box-shadow:0 3px 10px rgba(0,0,0,0.08); flex:1; }
+    .table { width:100%; border-collapse:collapse; }
+    .table th, .table td { padding:12px; border-bottom:1px solid #eaeaea; vertical-align:top }
+    .badge { padding:6px 8px;border-radius:6px;color:#fff;display:inline-block }
+    .badge.pending{background:#ff9800}
+    .badge.inprocess{background:#2196f3}
+    .badge.resolved{background:#4caf50}
+    .badge.escalated{background:#f44336}
+    .actions form { display:inline-block; margin-right:6px; }
+    .sidebar .menu-item { display:block; padding:8px 6px; margin-bottom:4px; color:inherit; text-decoration:none; }
+    .table small { color:#666 }
+    .muted { color:#666; font-size:13px }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Admin Panel</h1>
+      <div>
+        <a href="/logout" class="btn">Logout</a>
+      </div>
+    </header>
+
+    <div class="grid-3" style="display:flex;gap:18px;margin-top:18px">
+      <aside class="card sidebar" style="width:220px;">
+        <a href="/admin/dashboard" class="menu-item">All</a>
+        <a href="/admin/dashboard?filter=pending" class="menu-item">Pending</a>
+        <a href="/admin/dashboard?filter=inprocess" class="menu-item">In Process</a>
+        <a href="/admin/dashboard?filter=escalated" class="menu-item">Escalated</a>
+        <a href="/admin/dashboard?filter=resolved" class="menu-item">Resolved</a>
+        <a href="/admin/analytics" class="menu-item">Analytics</a>
+        <a href="/admin/export/csv" class="menu-item">Export CSV</a>
+      </aside>
+
+      <section style="flex:1;">
+        <div class="cards">
+          <div class="card-small">Total <strong><%= total %></strong></div>
+          <div class="card-small">Pending <strong><%= summary['Pending'] || 0 %></strong></div>
+          <div class="card-small">In Process <strong><%= summary['In Process'] || 0 %></strong></div>
+          <div class="card-small">Resolved <strong><%= summary['Resolved'] || 0 %></strong></div>
+          <div class="card-small">Escalated <strong><%= summary['Escalated'] || 0 %></strong></div>
+        </div>
+
+        <form method="GET" action="/admin/dashboard" style="display:flex;gap:10px;margin-bottom:12px">
+          <input name="q" placeholder="Search by title, description or id..." value="<%= q %>" style="flex:1;padding:8px;border-radius:6px;border:1px solid #ddd">
+          <input type="hidden" name="filter" value="<%= filter %>">
+          <button class="btn">Search</button>
+        </form>
+
+        <table class="table">
+          <thead>
+            <tr><th>Ref</th><th>Title</th><th>Category</th><th>Student</th><th>Status</th><th>Assigned</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <% complaints.forEach(c => { %>
+              <tr>
+                <td style="min-width:120px;"><a href="/admin/complaints/<%= c._id %>"><%= c.referenceId || c._id %></a><br><small class="muted"><%= new Date(c.createdAt).toLocaleString() %></small></td>
+                <td style="min-width:220px;"><strong><%= c.title %></strong><div><small class="muted"><%= (c.description||'').slice(0,120) %><%= c.description && c.description.length>120 ? '...' : '' %></small></div></td>
+                <td><%= c.category %></td>
+                <td><%= c.anonymous ? "Anonymous" : (c.student ? (c.student.name + (c.student.roll ? ' - ' + c.student.roll : '')) : '—') %></td>
+                <td>
+                  <% if (c.status === 'Resolved') { %><span class="badge resolved">Resolved</span>
+                  <% } else if (c.status === 'In Process') { %><span class="badge inprocess">In Process</span>
+                  <% } else if (c.status === 'Escalated') { %><span class="badge escalated">Escalated</span>
+                  <% } else { %><span class="badge pending">Pending</span><% } %>
+                </td>
+                <td><%= c.assignedTo ? c.assignedTo.name : (c.assignedDepartment || '—') %></td>
+                <td class="actions">
+                  <a href="/admin/complaints/<%= c._id %>" class="btn">View</a>
+
+                  <form method="POST" action="/admin/resolve" style="display:inline">
+                    <input type="hidden" name="id" value="<%= c._id %>">
+                    <button class="btn" type="submit">Resolve</button>
+                  </form>
+
+                  <form method="POST" action="/admin/escalate" style="display:inline">
+                    <input type="hidden" name="id" value="<%= c._id %>">
+                    <button class="btn secondary" type="submit">Escalate</button>
+                  </form>
+
+                  <form method="POST" action="/admin/delete" style="display:inline" onsubmit="return confirm('Are you sure you want to delete this complaint?')">
+                    <input type="hidden" name="id" value="<%= c._id %>">
+                    <button class="btn" style="background:#e74c3c;color:#fff">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div style="margin-top:16px; display:flex; align-items:center; gap:8px;">
+          <% if (page > 1) { %>
+            <a href="?page=<%= page-1 %>&per=<%= per %>&filter=<%= filter %>&q=<%= encodeURIComponent(q) %>" class="btn">Prev</a>
+          <% } %>
+          <span>Page <%= page %></span>
+          <% if (total > page*per) { %>
+            <a href="?page=<%= page+1 %>&per=<%= per %>&filter=<%= filter %>&q=<%= encodeURIComponent(q) %>" class="btn">Next</a>
+          <% } %>
+        </div>
+      </section>
+
+      <!-- Right column: quick assign -->
+      <aside style="width:300px;">
+        <div class="card-small">
+          <h4>Quick Assign</h4>
+          <form method="POST" action="/admin/assign">
+            <label>Complaint Id</label><input name="id" required style="width:100%;padding:8px;margin-bottom:8px">
+            <label>Assign to Officer</label>
+            <select name="assignedTo" style="width:100%;padding:8px;margin-bottom:8px">
+              <option value="">-- select officer --</option>
+              <% officers.forEach(o => { %>
+                <option value="<%= o._id %>"><%= o.name %> — <%= o.email %></option>
+              <% }) %>
+            </select>
+            <label>Or Department</label>
+            <input name="assignedDepartment" placeholder="e.g. Hostel" style="width:100%;padding:8px;margin-bottom:8px">
+            <button class="btn" type="submit">Assign</button>
+          </form>
+        </div>
+
+        <div class="card-small" style="margin-top:12px">
+          <h4>Export</h4>
+          <a href="/admin/export/csv" class="btn">Export all complaints (CSV)</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>
+

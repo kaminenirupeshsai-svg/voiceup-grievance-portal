@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Dashboard — E-Grievance Portal</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo">EG</div>
+        <div>
+          <div class="site-title">E-Grievance Portal</div>
+          <div style="font-size:13px;color:var(--muted)">Welcome, Student</div>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="/logout" class="btn secondary">Logout</a>
+      </div>
+    </header>
+
+    <div class="grid-3">
+      <!-- SIDEBAR -->
+      <aside class="card sidebar">
+        <div class="menu-item active">Dashboard</div>
+        <a href="lodge-complaint.html" class="menu-item">Lodge Complaint</a>
+        <a href="/complaint/history" class="menu-item">Complaint History</a>
+        <a href="account.html" class="menu-item">Account Settings</a>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <section class="card">
+        <h3 style="margin-top:0">Dashboard</h3>
+        <p style="color:var(--muted)">Quick actions & recent complaints</p>
+
+        <!-- QUICK SEARCH -->
+        <div class="card" style="padding:12px;margin-bottom:12px">
+          <strong>Quick Search</strong>
+          <p style="margin:6px 0;color:var(--muted)">Search your complaints by title, category or description.</p>
+          <form method="POST" action="/complaint/quick" style="display:flex;gap:8px">
+            <input type="text" name="query"
+              placeholder="Search complaint..." required
+              style="flex:1;padding:10px 12px;border-radius:8px;border:1px solid #e6e9ef">
+            <button class="btn" type="submit">Search</button>
+          </form>
+        </div>
+
+        <!-- QUICK LODGE -->
+        <div class="card" style="padding:12px;margin-bottom:12px">
+          <strong>Quick Lodge</strong>
+          <p style="margin:6px 0;color:var(--muted)">Submit a short anonymous complaint quickly.</p>
+          <form method="POST" action="/complaint/quick-lodge" style="display:flex;gap:8px">
+            <input name="short"
+              placeholder="Type a short complaint..." required
+              style="flex:1;padding:10px 12px;border-radius:8px;border:1px solid #e6e9ef">
+            <button class="btn" type="submit">Submit</button>
+          </form>
+        </div>
+
+        <!-- RECENT COMPLAINTS (static placeholders for now) -->
+        <h4 style="margin:14px 0 8px 0">Recent Complaints</h4>
+
+        <div class="complaint">
+          <div style="flex:1">
+            <div style="font-weight:700">Internet connectivity issues in library</div>
+            <div style="color:var(--muted);font-size:13px">Submitted: 2 days ago — Category: Infrastructure</div>
+          </div>
+          <div style="text-align:right">
+            <div class="badge inprocess">In Process</div>
+            <div style="margin-top:6px;color:var(--muted);font-size:13px">Ref: #EG-102</div>
+          </div>
+        </div>
+
+        <div class="complaint">
+          <div style="flex:1">
+            <div style="font-weight:700">Mess food quality</div>
+            <div style="color:var(--muted);font-size:13px">Submitted: 6 days ago — Category: Others</div>
+          </div>
+          <div style="text-align:right">
+            <div class="badge resolved">Resolved</div>
+            <div style="margin-top:6px;color:var(--muted);font-size:13px">Ref: #EG-088</div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</body>
+</html>
+
+
+

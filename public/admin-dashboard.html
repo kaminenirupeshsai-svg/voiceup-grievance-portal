@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Panel — E-Grievance Portal</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">AD</div>
+        <div>
+          <div class="site-title">Admin Dashboard</div>
+          <div style="font-size:13px;color:var(--muted)">Manage complaints & reports</div>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="index.html" class="btn secondary">Logout</a>
+      </div>
+    </header>
+
+    <div class="grid-3">
+      <aside class="card sidebar">
+        <div class="menu-item active">All Complaints</div>
+        <div class="menu-item">Pending</div>
+        <div class="menu-item">Escalated</div>
+        <div class="menu-item">Analytics</div>
+      </aside>
+
+      <section class="card">
+        <h3 style="margin-top:0">All Complaints</h3>
+        <p style="color:var(--muted)">Review, respond, and escalate complaints</p>
+
+        <table class="table" style="margin-top:12px">
+          <thead>
+            <tr><th>Ref</th><th>Title</th><th>Category</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#EG-102</td>
+              <td>Internet connectivity issues</td>
+              <td>Infrastructure</td>
+              <td><span class="badge inprocess">In Process</span></td>
+              <td>
+                <form method="POST" action="/admin/respond" style="display:inline">
+                  <input type="hidden" name="ref" value="EG-102">
+                  <button class="btn" type="submit">Respond</button>
+                </form>
+                <form method="POST" action="/admin/escalate" style="display:inline;margin-left:6px">
+                  <input type="hidden" name="ref" value="EG-102">
+                  <button class="btn secondary" type="submit">Escalate</button>
+                </form>
+              </td>
+            </tr>
+            <!-- dynamic rows -->
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>E-Grievance Portal</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+   
+    /* Top Navigation */
+    .nav {
+      display: flex;
+    
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 50px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .nav .right a {
+      margin-left: 20px;
+      padding: 10px 20px;
+      background: rgba(43, 10, 233, 0.829);
+      border-radius: 25px;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      backdrop-filter: blur(5px);
+      transition: 0.2s;
+    }
+
+    .nav .right a:hover {
+      background: white;
+      color: #2010ca;
+    }
+
+    /* Hero Section */
+    .hero {
+      margin-top: 60px;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .hero p {
+      font-size: 20px;
+      opacity: 0.9;
+      margin-bottom: 40px;
+    }
+
+    .hero .btn {
+      margin: 10px;
+      padding: 14px 28px;
+      font-size: 18px;
+      border-radius: 30px;
+      background: white;
+      color: #6a11cb;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.25s;
+    }
+
+    .hero .btn:hover {
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.4);
+    }
+    
+    .container-center {
+      max-width: 900px;
+      margin: 60px auto;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #0b0606;
+    }
+
+    p.subtitle {
+      color: #181717;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+
+    .login-options {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .card-box {
+      background: #fff;
+      width: 260px;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      transition: 0.2s;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .card-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+
+    .card-box .icon {
+      width: 60px;
+      height: 60px;
+      background: #eef2ff;
+      margin: auto;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 26px;
+      color: #4f46e5;
+    }
+
+    .card-box h3 {
+      margin: 15px 0 8px;
+      font-size: 20px;
+      color: #333;
+    }
+
+    .card-box p {
+      color: #777;
+      font-size: 14px;
+    }
+
+    .card-box a {
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
+</head>
+
+<body>
+   <!-- Top Navigation -->
+  <div class="nav">
+   <div class="logo">EG</div>
+    <div class="right">
+      
+      <a href="/about.html">About</a>
+      <a href="/student-login">Login</a>
+      <a href="/register.html" class="btn">Register</a>
+
+    </div>
+  </div>
+
+  <div class="container-center">
+    <h1>E-Grievance Redressal Portal</h1>
+    <p class="subtitle">Secure, anonymous, fast redressal for student complaints</p>
+
+    <div class="login-options">
+      <!-- Student -->
+      <a href="/student-login">
+        <div class="card-box">
+          <div class="icon">🎓</div>
+          <h3>Student Login</h3>
+          <p>Submit & track complaints</p>
+        </div>
+      </a>
+      <!-- Admin -->
+      <a href="/admin-login">
+        <div class="card-box">
+          <div class="icon">🛡️</div>
+          <h3>Admin Login</h3>
+          <p>Review & assign complaints</p>
+        </div>
+      </a>
+
+      <!-- Grievance -->
+      <a href="/grievance-login">
+        <div class="card-box">
+          <div class="icon">📢</div>
+          <h3>Grievance Cell Login</h3>
+          <p>Resolve escalated issues</p>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</body>
+</html>
+

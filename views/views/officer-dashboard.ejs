@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Grievance Officer Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+
+  <style>
+    .details-box {
+      padding: 12px;
+      background: #f7f7f7;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .modal {
+      display:none;
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:rgba(0,0,0,0.6);
+      justify-content:center;
+      align-items:center;
+      z-index:99;
+    }
+    .modal-content {
+      background:#fff;
+      width:560px;
+      padding:20px;
+      border-radius:10px;
+      animation:fadeIn .3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform:scale(0.95); }
+      to { opacity:1; transform:scale(1); }
+    }
+    .close-btn {
+      float:right;
+      font-size:22px;
+      cursor:pointer;
+      color:#555;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo">OF</div>
+        <div>
+          <div class="site-title">Grievance Officer</div>
+          <div style="font-size:13px;color:var(--muted)">Manage escalated complaints</div>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="/logout" class="btn secondary">Logout</a>
+      </div>
+    </header>
+
+    <!-- MAIN CARD -->
+    <div class="card">
+      <h3>Escalated Complaints</h3>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Title</th>
+            <th>Student</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% complaints.forEach(c => { %>
+            <tr>
+              <td><%= c.referenceId %></td>
+              <td><%= c.title %></td>
+              <td><%= c.anonymous ? "Anonymous" : c.student?.name %></td>
+              <td><%= c.category %></td>
+
+              <td>
+                <span class="badge inprocess"><%= c.status %></span>
+              </td>
+
+              <td style="display:flex; gap:8px;">
+                <button class="btn small" onclick="openDetails('<%= c._id %>')">View</button>
+
+                <form method="POST" action="/officer/resolve">
+                  <input type="hidden" name="id" value="<%= c._id %>">
+                  <button class="btn small primary" type="submit">Resolve</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DETAILS MODAL -->
+  <div id="detailsModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeDetails()">×</span>
+      <h3>Complaint Details</h3>
+
+      <div id="detailsArea">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    function openDetails(id) {
+      const modal = document.getElementById("detailsModal");
+      const box = document.getElementById("detailsArea");
+
+      modal.style.display = "flex";
+      box.innerHTML = "Loading...";
+
+      fetch(`/officer/details/${id}`)
+        .then(res => res.json())
+        .then(d => {
+          box.innerHTML = `
+            <div class="details-box"><b>Title:</b> ${d.title}</div>
+            <div class="details-box"><b>Category:</b> ${d.category}</div>
+            <div class="details-box"><b>Description:</b> ${d.description}</div>
+            <div class="details-box"><b>Priority:</b> ${d.priority}</div>
+            <div class="details-box"><b>Student:</b> ${d.anonymous ? "Anonymous" : (d.student?.name || "N/A")}</div>
+            <div class="details-box"><b>Status:</b> ${d.status}</div>
+            <div class="details-box"><b>Created:</b> ${new Date(d.createdAt).toLocaleString()}</div>
+
+            ${d.attachment ? 
+              `<div class="details-box"><b>Attachment:</b> 
+                <a href="/uploads/${d.attachment}" target="_blank">View File</a></div>` : "" }
+
+            <h4>Add Remark</h4>
+            <form method="POST" action="/officer/remark">
+              <input type="hidden" name="id" value="${d._id}">
+              <textarea name="remark" class="input" placeholder="Enter your remark" required></textarea>
+              <button class="btn primary" style="margin-top:8px;">Add Remark</button>
+            </form>
+
+            <h4>Remarks History</h4>
+            ${(d.remarks.length > 0) ? d.remarks.map(r => `
+              <div class="details-box">
+                <b>${r.by}</b> — ${new Date(r.at).toLocaleString()}<br>
+                ${r.text}
+              </div>
+            `).join("") : "<div class='details-box'>No remarks yet</div>"}
+          `;
+        });
+    }
+
+    
+
+    function closeDetails() {
+      document.getElementById("detailsModal").style.display = "none";
+    }
+  </script>
+</body>
+</html>

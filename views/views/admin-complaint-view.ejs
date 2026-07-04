@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Complaint - <%= complaint.title %></title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .label { font-weight:600; }
+    .box { padding:12px; border-radius:8px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin-bottom:12px; }
+    .timeline { border-left: 3px solid #eee; padding-left:12px; }
+    .timeline-item { margin-bottom:12px; }
+    .muted { color:#666; font-size:13px }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h2>Complaint Details</h2>
+      <a href="/admin/dashboard" class="btn">Back to Dashboard</a>
+    </header>
+
+    <div style="margin-top:16px;">
+      <div class="box">
+        <h3><%= complaint.title %></h3>
+        <div class="muted">Ref: <%= complaint.referenceId || complaint._id %> &nbsp; | &nbsp; <%= new Date(complaint.createdAt).toLocaleString() %></div>
+        <p style="margin-top:10px;"><%= complaint.description %></p>
+
+        <p><span class="label">Category:</span> <%= complaint.category || '—' %></p>
+        <p><span class="label">Status:</span> <%= complaint.status %></p>
+        <p><span class="label">Assigned:</span> <%= complaint.assignedTo ? complaint.assignedTo.name : (complaint.assignedDepartment || '—') %></p>
+
+        <% if (complaint.attachments && complaint.attachments.length) { %>
+          <div>
+            <span class="label">Attachments:</span>
+            <ul>
+              <% complaint.attachments.forEach(a => { %>
+                <li><a href="/uploads/<%= a.path %>" target="_blank"><%= a.originalName %></a></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Remark form -->
+      <div class="box">
+        <h4>Add Remark</h4>
+        <form method="POST" action="/admin/remark">
+          <input type="hidden" name="id" value="<%= complaint._id %>">
+          <textarea name="remark" rows="4" style="width:100%;padding:8px" placeholder="Type remark (visible to student/officer as configured)"></textarea>
+          <div style="margin-top:8px">
+            <button class="btn">Add Remark</button>
+            <form method="POST" action="/admin/resolve" style="display:inline">
+              <input type="hidden" name="id" value="<%= complaint._id %>">
+              <button class="btn" style="margin-left:8px">Resolve</button>
+            </form>
+          </div>
+        </form>
+      </div>
+
+      <!-- Timeline -->
+      <div class="box">
+        <h4>Timeline & Remarks</h4>
+        <div class="timeline">
+          <% if (complaint.history && complaint.history.length) { %>
+            <% complaint.history.forEach(h => { %>
+              <div class="timeline-item">
+                <div><strong><%= h.by %></strong> <span class="muted"> - <%= h.action %> at <%= new Date(h.at).toLocaleString() %></span></div>
+                <% if (h.note) { %><div style="margin-top:6px;"><%= h.note %></div><% } %>
+              </div>
+            <% }) %>
+          <% } %>
+
+          <% if (complaint.remarks && complaint.remarks.length) { %>
+            <% complaint.remarks.forEach(r => { %>
+              <div class="timeline-item">
+                <div><strong><%= r.by %></strong> <span class="muted"> - remark at <%= new Date(r.at).toLocaleString() %></span></div>
+                <div style="margin-top:6px;"><%= r.text %></div>
+              </div>
+            <% }) %>
+          <% } %>
+
+          <% if ((!complaint.history || !complaint.history.length) && (!complaint.remarks || !complaint.remarks.length)) { %>
+            <div class="muted">No history or remarks yet</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .analytics-container { display:flex; gap:20px; flex-wrap:wrap; margin-top:20px; }
+    .chart-card { width:450px; background:#fff; padding:18px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/admin/dashboard" class="btn secondary">← Back</a>
+    <h2>Analytics Overview</h2>
+
+    <div class="analytics-container">
+      <div class="chart-card"><h3>By Status</h3><canvas id="statusChart"></canvas></div>
+      <div class="chart-card"><h3>By Category</h3><canvas id="categoryChart"></canvas></div>
+    </div>
+
+    <script>
+       const statusData = JSON.parse(`<%- JSON.stringify(statusCounts) %>`);
+       const categoryData = JSON.parse(`<%- JSON.stringify(categoryCounts) %>`);
+
+      new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+          labels: statusData.map(s => s._id || 'Unknown'),
+          datasets: [{ data: statusData.map(s => s.count || 0), backgroundColor:['#2196f3','#ff9800','#4caf50','#f44336'] }]
+        }
+      });
+
+      new Chart(document.getElementById('categoryChart'), {
+        type: 'bar',
+        data: {
+          labels: categoryData.map(c => c._id || 'Unknown'),
+          datasets: [{ label: 'Complaints', data: categoryData.map(c => c.count || 0), backgroundColor:'#2196f3' }]
+        },
+        options: { responsive:true, scales: { y: { beginAtZero:true } } }
+      });
+    </script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Complaint History</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      padding: 20px; 
+      background: #f7f7f7;
+    }
+    h2 { color: #333; }
+    .card { 
+      background: #fff;
+      padding: 15px; 
+      margin-bottom: 15px; 
+      border: 1px solid #ddd; 
+      border-radius: 8px; 
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .title { 
+      font-size: 18px; 
+      font-weight: bold; 
+      margin-bottom: 6px;
+      color: #222;
+    }
+    .meta { 
+      color: #555; 
+      font-size: 14px; 
+      margin-bottom: 8px;
+    }
+    .actions a {
+      text-decoration: none;
+      color: #d00;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .actions a:hover { text-decoration: underline; }
+    .back-btn {
+      display:inline-block;
+      margin-top:20px;
+      padding:8px 14px;
+      background:#333;
+      color:#fff;
+      text-decoration:none;
+      border-radius:6px;
+    }
+    .back-btn:hover { background:#111; }
+  </style>
+
+  <script>
+    function confirmDelete(id) {
+      if (confirm("Are you sure you want to delete this complaint?")) {
+        window.location.href = "/complaint/delete/" + id;
+      }
+    }
+  </script>
+
+</head>
+<body>
+
+  <h2>Your Complaint History</h2>
+
+  <% if (complaints.length === 0) { %>
+    <p>No complaints submitted yet.</p>
+  <% } %>
+
+  <% complaints.forEach(c => { %>
+    <div class="card">
+      <div class="title"><%= c.title %></div>
+
+      <div class="meta">
+        Category: <%= c.category %> |
+        Status: <%= c.status %> |
+        Priority: <%= c.priority %>
+      </div>
+
+      <p><%= c.description %></p>
+
+      <small>Submitted on: <%= new Date(c.createdAt).toLocaleString() %></small>
+
+      <div class="actions">
+        <a href="javascript:void(0)" onclick="confirmDelete('<%= c._id %>')">🗑 Delete</a>
+      </div>
+    </div>
+  <% }) %>
+
+  <a class="back-btn" href="/student-dashboard.html">⬅ Back to Dashboard</a>
+
+</body>
+</html>
+
+
+
+

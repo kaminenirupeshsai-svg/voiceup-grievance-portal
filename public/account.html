@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Account Settings — E-Grievance Portal</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">EG</div>
+        <div class="site-title">Account Settings</div>
+      </div>
+      <div class="actions">
+        <a href="/student-dashboard.html" class="btn secondary">Back</a>
+      </div>
+    </header>
+
+    <section class="card" style="max-width:600px;margin:auto;margin-top:20px;">
+      <h3>Update Profile</h3>
+      <form method="POST" action="/auth/update-profile">
+        <div class="form-row">
+          <label>Name:</label>
+          <input type="text" name="name" required>
+        </div>
+
+        <div class="form-row">
+          <label>Email:</label>
+          <input type="email" name="email" required>
+        </div>
+
+        <div class="form-row">
+          <label>Change Password:</label>
+          <input type="password" name="password" placeholder="Leave blank if unchanged">
+        </div>
+
+        <button class="btn" type="submit">Update Profile</button>
+      </form>
+    </section>
+  </div>
+
+</body>
+</html>

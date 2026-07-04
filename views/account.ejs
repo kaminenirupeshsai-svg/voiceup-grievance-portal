@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Account Settings</title>
+  <style>
+    body { font-family: Arial; background:#f5f7fb; padding:20px; }
+    .card { max-width:600px; margin:auto; background:white; padding:25px;
+            border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+    .form-row { margin-bottom:12px; }
+    label { font-weight:bold; display:block; margin-bottom:6px; }
+    input {
+      width:100%; padding:10px; border-radius:6px;
+      border:1px solid #ccc; font-size:15px;
+    }
+    .btn { background:#0066ff; color:white; padding:10px 15px;
+           border:none; border-radius:6px; cursor:pointer; }
+    .btn.secondary { background:#ddd; color:#333; margin-left:6px; }
+  </style>
+</head>
+<body>
+
+<a href="/student-dashboard.html">Back</a>
+
+<div class="card">
+  <h2>Account Settings</h2>
+
+  <form method="POST" action="/auth/update-profile">
+
+    <div class="form-row">
+      <label>Name</label>
+      <input type="text" name="name" value="<%= user.name %>" required>
+    </div>
+
+    <div class="form-row">
+      <label>Roll Number</label>
+      <input type="text" value="<%= user.roll %>" disabled>
+    </div>
+
+    <div class="form-row">
+      <label>Department</label>
+      <input type="text" name="department" value="<%= user.department %>" required>
+    </div>
+
+    <div class="form-row">
+      <label>Email</label>
+      <input type="email" name="email" value="<%= user.email %>" required>
+    </div>
+
+    <div class="form-row">
+      <label>Change Password (optional)</label>
+      <input type="password" name="password" placeholder="Leave blank if unchanged">
+    </div>
+
+    <button class="btn" type="submit">Update Profile</button>
+    <a class="btn secondary" href="/student-dashboard.html">Cancel</a>
+
+  </form>
+</div>
+
+</body>
+</html>
+
+
+
+
+
