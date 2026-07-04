@@ -40,6 +40,18 @@ const ComplaintSchema = new mongoose.Schema({
     }
   ],
 
+  // ACTION HISTORY (assignment/resolve/escalate/delete/remark audit trail)
+  history: [
+    {
+      by: { type: String },
+      action: { type: String },
+      assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+      assignedDepartment: { type: String },
+      note: { type: String },
+      at: { type: Date, default: Date.now }
+    }
+  ],
+
 }, { timestamps: true });
 
 // AUTO REFERENCE ID

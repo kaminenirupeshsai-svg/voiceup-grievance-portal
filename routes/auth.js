@@ -12,8 +12,10 @@ router.post("/test", (req, res) => {
 });
 
 /* -------------------------------------------
-   LOGIN PAGES (STATIC HTML)
-   These pages are inside /public
+   LOGIN / REGISTER PAGES
+   Canonical routes live in routes/pages.js;
+   kept here only for the /auth/* aliases used
+   by older links.
 ------------------------------------------- */
 
 // Student Login Page
@@ -23,17 +25,7 @@ router.get("/student-login", (req, res) => {
 
 // Student Register Page
 router.get("/student-register", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/student-register.html"));
-});
-
-// Admin Login Page (EJS)
-router.get("/admin-login", (req, res) => {
-  res.render("admin-login");
-});
-
-// Grievance Officer Login Page (EJS)
-router.get("/grievance-login", (req, res) => {
-  res.render("grievance-login");
+  res.sendFile(path.join(__dirname, "../public/register.html"));
 });
 
 /* -------------------------------------------
@@ -56,7 +48,7 @@ router.post("/login-student", async (req, res) => {
     role: user.role
   };
 
-  res.redirect("/student-dashboard.html");  // from /public
+  res.redirect("/dashboard");
 });
 
 /* -------------------------------------------
@@ -98,6 +90,39 @@ router.post("/login-grievance", async (req, res) => {
   };
 
   res.redirect("/grievance/dashboard");
+});
+
+/* -------------------------------------------
+   ACCOUNT SETTINGS
+------------------------------------------- */
+router.get("/account", async (req, res) => {
+  if (!req.session.user) return res.redirect("/student-login");
+
+  const user = await User.findById(req.session.user.id || req.session.user._id);
+  res.render("account", { user });
+});
+
+router.post("/update-profile", async (req, res) => {
+  if (!req.session.user) return res.redirect("/student-login");
+
+  try {
+    const { name, department, email, password } = req.body;
+    const update = { name, department, email };
+
+    if (password && password.trim()) {
+      update.password = await bcrypt.hash(password, 10);
+    }
+
+    const userId = req.session.user.id || req.session.user._id;
+    const user = await User.findByIdAndUpdate(userId, update, { new: true });
+
+    req.session.user.name = user.name;
+    req.session.user.email = user.email;
+
+    res.redirect("/auth/account");
+  } catch (err) {
+    res.send("❌ Error updating profile: " + err.message);
+  }
 });
 
 /* -------------------------------------------

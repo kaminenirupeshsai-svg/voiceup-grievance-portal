@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Officer — Resolved Complaints</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo">OF</div>
+        <div>
+          <div class="site-title">Grievance Officer</div>
+          <div style="font-size:13px;color:var(--muted)">Resolved complaints history</div>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="/officer/dashboard" class="btn secondary">Dashboard</a>
+        <a href="/logout" class="btn secondary">Logout</a>
+      </div>
+    </header>
+
+    <!-- MAIN CARD -->
+    <div class="card">
+      <h3>Resolved Complaints</h3>
+
+      <% if (complaints.length === 0) { %>
+        <p style="color:var(--muted)">No resolved complaints yet.</p>
+      <% } %>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Title</th>
+            <th>Student</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Resolved</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% complaints.forEach(c => { %>
+            <tr>
+              <td><%= c.referenceId %></td>
+              <td><%= c.title %></td>
+              <td><%= c.anonymous ? "Anonymous" : c.student?.name %></td>
+              <td><%= c.category %></td>
+              <td><span class="badge resolved"><%= c.status %></span></td>
+              <td><%= c.resolvedAt ? new Date(c.resolvedAt).toLocaleString() : new Date(c.updatedAt).toLocaleString() %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

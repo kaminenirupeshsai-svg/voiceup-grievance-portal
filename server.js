@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
@@ -5,6 +7,10 @@ const MongoStore = require("connect-mongo");
 const path = require("path");
 
 const app = express();
+
+const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/egrievance";
+const SESSION_SECRET = process.env.SESSION_SECRET || "super-secret-key";
+const PORT = process.env.PORT || 5000;
 
 /* ============================================
    🔹 1. STATIC FILES
@@ -20,7 +26,7 @@ app.set("views", path.join(__dirname, "views"));
 /* ============================================
    🔹 3. DATABASE
 ============================================ */
-mongoose.connect("mongodb://127.0.0.1:27017/egrievance")
+mongoose.connect(MONGO_URL)
   .then(() => console.log("✅ MongoDB connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
 
@@ -32,11 +38,11 @@ app.use(express.json());
 
 app.use(
   session({
-    secret: "super-secret-key",
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: "mongodb://127.0.0.1:27017/egrievance",
+      mongoUrl: MONGO_URL,
     }),
   })
 );
@@ -48,11 +54,6 @@ app.use(
 // 🔥 Student Register Page (HTML)
 app.get("/student-register", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "register.html"));
-});
-
-// 🔥 About Page (if you have it)
-app.get("/about", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "about.html"));
 });
 
 /* ============================================
@@ -84,21 +85,8 @@ try {
 }
 
 /* ============================================
-   🔹 8. HOME 
+   🔹 8. START SERVER
 ============================================ */
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-/* contact*/
-app.get("/contact", (req, res) => {
-    res.sendFile(__dirname + "/public/contact.html");
-});
-
-/* ============================================
-   🔹 9. START SERVER
-============================================ */
-const PORT = 5000;
 app.listen(PORT, () =>
   console.log(`🚀 Server running at http://localhost:${PORT}`)
 );
