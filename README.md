@@ -115,6 +115,29 @@ Egrivance/
    npm start
    ```
 
+# 👤 Roles & Accounts
+
+Only students self-register (`/register.html`). Admin, Grievance Cell, and
+Officer accounts can only be created from inside the Admin Panel
+(`/admin/users/new`), which requires being logged in as an admin —
+so the very first admin has to be bootstrapped directly:
+
+```
+node scripts/create-admin.js "Full Name" admin@example.com yourpassword
+```
+
+Run this once against your target database (local or the deployed
+`MONGO_URL`). After that, log in at `/admin-login` and use **Manage Users**
+to create Grievance Cell and Officer accounts through the UI — no more
+scripts needed.
+
+| Role | Purpose |
+|---|---|
+| Student | Files complaints, tracks status, rates resolutions |
+| Grievance Cell | Triages new complaints; marks "In Process" or escalates to an Officer |
+| Grievance Officer | Resolves escalated complaints |
+| Admin | Full oversight: all complaints, assignment, analytics, user management |
+
 # ☁️ Deployment (Render)
 
 This repo includes a `render.yaml` Blueprint for one-click setup on [Render](https://render.com):
