@@ -77,9 +77,12 @@ Egrivance/
 │
 ├── public/           # Static pages served directly (landing, login forms, styles)
 ├── views/            # EJS templates rendered from live database data
+│   └── partials/     # Shared head/sidebar chrome used by every dashboard
 ├── routes/           # Express routers (auth, admin, complaint, grievance, officer, dashboard, pages)
 ├── models/           # Mongoose schemas (User, Complaint)
-├── middleware/       # Route guards (requireAdmin)
+├── middleware/       # Route guards (requireRole) and file upload handling (multer)
+├── utils/            # Email notifications (mailer, notify)
+├── uploads/           # Complaint attachments (gitignored, runtime-only)
 └── server.js         # App entry point
 ```
 
@@ -87,8 +90,8 @@ Egrivance/
 
 1. Clone the repository
    ```
-   git clone https://github.com/yourusername/egrievance-hub.git
-   cd egrievance-hub
+   git clone https://github.com/kaminenirupeshsai-svg/voiceup-grievance-portal.git
+   cd voiceup-grievance-portal
    ```
 2. Install dependencies
    ```
@@ -99,11 +102,32 @@ Egrivance/
    MONGO_URL=your-mongodb-connection-string
    SESSION_SECRET=your-session-secret
    PORT=5000
+
+   # optional — email notifications, disabled if left blank
+   SMTP_HOST=
+   SMTP_PORT=587
+   SMTP_USER=
+   SMTP_PASS=
+   FROM_EMAIL=
    ```
 4. Start the server
    ```
    npm start
    ```
+
+# ☁️ Deployment (Render)
+
+This repo includes a `render.yaml` Blueprint for one-click setup on [Render](https://render.com):
+
+1. Push this repo to GitHub (already done if you're reading this from the deployed repo).
+2. On Render: **New → Blueprint**, connect the `voiceup-grievance-portal` repo, and it will read `render.yaml` automatically.
+3. Render will prompt for the env vars marked `sync: false` — set at minimum:
+   - `MONGO_URL` — your MongoDB Atlas connection string
+   - `SESSION_SECRET` — any long random string
+   - SMTP vars are optional; leave blank to keep email notifications disabled
+4. Deploy. Render assigns `PORT` automatically — the app already reads `process.env.PORT`.
+
+**Known limitation:** complaint attachments are stored on local disk via `multer`. Render's free tier has an **ephemeral filesystem** — uploaded files are wiped on every redeploy/restart. For production-durable attachments, swap the storage in `middleware/upload.js` for an object store (e.g. S3, Cloudinary) or add a [Render persistent disk](https://render.com/docs/disks) (paid).
 
 # 📜 License
 
