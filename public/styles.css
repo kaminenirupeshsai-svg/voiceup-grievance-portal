@@ -300,14 +300,28 @@ textarea{min-height:120px; resize:vertical}
 .row{display:flex; gap:12px; align-items:center}
 .spread{display:flex; justify-content:space-between; align-items:center}
 .grid-2{display:grid; grid-template-columns:2fr 1fr; gap:20px; align-items:start}
+.grid-2 > *{min-width:0}
+
+/* Safety net: nothing on the page should ever force horizontal scroll */
+html, body{overflow-x:hidden; max-width:100%}
 
 /* ============ Responsive ============ */
 @media (max-width:960px){
   .form-grid, .grid-2{grid-template-columns:1fr}
   .app-shell{flex-direction:column}
-  .app-sidebar{width:100%; height:auto; position:relative; flex-direction:row; overflow-x:auto}
-  .app-sidebar nav{flex-direction:row; padding:10px}
-  .app-sidebar .side-brand, .app-sidebar .side-foot{display:none}
+  .app-sidebar{width:100%; height:auto; position:relative; flex-direction:row; flex-wrap:wrap; border-bottom:1px solid var(--border-soft)}
+  .app-sidebar nav{flex-direction:row; flex-wrap:wrap; padding:10px; flex:1}
+  .app-sidebar .side-brand{display:none}
+  .app-sidebar .side-foot{
+    display:flex; flex-direction:row; align-items:center; gap:6px;
+    padding:10px; border-top:none;
+  }
   .app-content{padding:18px}
   .topnav{padding:14px 18px}
+}
+
+@media (max-width:480px){
+  .topnav{flex-wrap:wrap; row-gap:8px}
+  .topnav nav{flex-wrap:wrap; justify-content:flex-end; gap:4px}
+  .topnav nav a{padding:7px 11px; font-size:13px}
 }
