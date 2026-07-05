@@ -15,3 +15,6 @@ yarn-error.log
 # Uploaded complaint attachments (user content, not source)
 uploads/*
 !uploads/.gitkeep
+
+# Local MCP server config (may contain connection strings/credentials)
+.mcp.json
