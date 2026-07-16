@@ -5,6 +5,24 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 
 /* -------------------------------------------
+   GENUINE-STUDENT CHECK
+   If ALLOWED_EMAIL_DOMAINS is set (comma-separated,
+   e.g. "svce.ac.in,student.svce.ac.in"), registration
+   is only allowed for emails on those domains.
+   Left blank = any email accepted (dev mode).
+------------------------------------------- */
+const ALLOWED_EMAIL_DOMAINS = (process.env.ALLOWED_EMAIL_DOMAINS || "")
+  .split(",")
+  .map(d => d.trim().toLowerCase().replace(/^@/, ""))
+  .filter(Boolean);
+
+function isAllowedEmail(email) {
+  if (ALLOWED_EMAIL_DOMAINS.length === 0) return true;
+  const domain = String(email).split("@")[1]?.toLowerCase();
+  return !!domain && ALLOWED_EMAIL_DOMAINS.includes(domain);
+}
+
+/* -------------------------------------------
    TEST ROUTE
 ------------------------------------------- */
 router.post("/test", (req, res) => {
@@ -32,7 +50,8 @@ router.get("/student-register", (req, res) => {
    STUDENT LOGIN
 ------------------------------------------- */
 router.post("/login-student", async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = String(req.body.email || "").trim().toLowerCase();
 
   const user = await User.findOne({ email, role: "student" });
   if (!user) return res.send("❌ Student not found");
@@ -55,7 +74,8 @@ router.post("/login-student", async (req, res) => {
    ADMIN LOGIN
 ------------------------------------------- */
 router.post("/login-admin", async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = String(req.body.email || "").trim().toLowerCase();
 
   const user = await User.findOne({ email, role: "admin" });
   if (!user) return res.send("❌ Admin not found");
@@ -74,7 +94,8 @@ router.post("/login-admin", async (req, res) => {
 router.post("/login-grievance", async (req, res) => {
   console.log("📌 Grievance Login Hit:", req.body);
 
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = String(req.body.email || "").trim().toLowerCase();
 
   const user = await User.findOne({ email, role: "grievance" });
   if (!user) return res.send("❌ Grievance Officer not found");
@@ -96,7 +117,8 @@ router.post("/login-grievance", async (req, res) => {
    GRIEVANCE OFFICER LOGIN
 ------------------------------------------- */
 router.post("/login-officer", async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = String(req.body.email || "").trim().toLowerCase();
 
   const user = await User.findOne({ email, role: "officer" });
   if (!user) return res.send("❌ Officer not found");
@@ -152,10 +174,18 @@ router.post("/update-profile", async (req, res) => {
 ------------------------------------------- */
 router.post("/register", async (req, res) => {
   try {
-    const { name, roll, email, department, password, confirm_password } = req.body;
+    const { name, roll, department, password, confirm_password } = req.body;
+    const email = String(req.body.email || "").trim().toLowerCase();
 
     if (confirm_password !== undefined && password !== confirm_password) {
       return res.send("❌ Passwords do not match");
+    }
+
+    if (!isAllowedEmail(email)) {
+      return res.send(
+        "❌ Please register with your official college email (" +
+        ALLOWED_EMAIL_DOMAINS.map(d => "@" + d).join(" or ") + ")"
+      );
     }
 
     const exists = await User.findOne({ email });

@@ -103,6 +103,10 @@ Egrivance/
    SESSION_SECRET=your-session-secret
    PORT=5000
 
+   # optional — restrict registration to official college emails (comma-separated)
+   # e.g. ALLOWED_EMAIL_DOMAINS=svce.ac.in,student.svce.ac.in
+   ALLOWED_EMAIL_DOMAINS=
+
    # optional — email notifications, disabled if left blank
    SMTP_HOST=
    SMTP_PORT=587

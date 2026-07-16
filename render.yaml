@@ -10,6 +10,8 @@ services:
         sync: false
       - key: SESSION_SECRET
         sync: false
+      - key: ALLOWED_EMAIL_DOMAINS
+        sync: false
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
