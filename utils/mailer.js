@@ -30,4 +30,24 @@ async function sendMail({ to, subject, html }) {
   }
 }
 
-module.exports = { sendMail };
+// Strict variant for OTPs: returns true only if the mail was accepted,
+// so the caller can tell the user when delivery failed.
+async function sendMailStrict({ to, subject, html }) {
+  if (!transporter || !to) return false;
+  try {
+    await transporter.sendMail({
+      from: process.env.FROM_EMAIL || process.env.SMTP_USER,
+      to,
+      subject,
+      html
+    });
+    return true;
+  } catch (err) {
+    console.error('✉️  Email send failed:', err.message);
+    return false;
+  }
+}
+
+const isConfigured = !!transporter;
+
+module.exports = { sendMail, sendMailStrict, isConfigured };

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Verify Account — VoiceUp</title>
+  <%- include('partials/head') %>
+  <style>
+    .otp-input{
+      text-align:center; font-size:24px; letter-spacing:10px; font-weight:700;
+    }
+    .notice{ border-radius:10px; padding:11px 14px; font-size:13.5px; margin-bottom:16px }
+    .notice.ok{ background:var(--resolved-bg); color:var(--resolved-fg); border:1px solid var(--resolved-bd) }
+    .notice.err{ background:var(--escalated-bg); color:var(--escalated-fg); border:1px solid var(--escalated-bd) }
+  </style>
+</head>
+<body>
+  <div class="auth-shell">
+    <div class="auth-card">
+      <div class="auth-icon" style="background:#059669"><i class="bi bi-shield-check"></i></div>
+      <h2>Verify your account</h2>
+      <p class="lead">Enter the 6-digit code we sent to your email</p>
+
+      <% if (sent) { %>
+        <div class="notice ok"><i class="bi bi-envelope-check"></i> Code sent — check your inbox (and spam folder).</div>
+      <% } %>
+      <% if (error) { %>
+        <div class="notice err"><i class="bi bi-exclamation-triangle"></i> <%= error %></div>
+      <% } %>
+
+      <form method="POST" action="/auth/verify-otp">
+        <div class="form-row">
+          <label>Roll Number</label>
+          <input name="roll" type="text" value="<%= roll %>" placeholder="eg: CS2201" required>
+        </div>
+        <div class="form-row">
+          <label>Verification Code</label>
+          <input name="otp" type="text" class="otp-input" inputmode="numeric" pattern="[0-9]{6}"
+                 maxlength="6" placeholder="••••••" autocomplete="one-time-code" required>
+        </div>
+        <button class="btn" type="submit">Verify</button>
+      </form>
+
+      <form method="POST" action="/auth/resend-otp" style="margin-top:10px">
+        <input type="hidden" name="roll" value="<%= roll %>">
+        <button class="btn secondary" type="submit" style="width:100%">Resend code</button>
+      </form>
+
+      <a class="auth-back" href="/student-login">← Back to Login</a>
+    </div>
+  </div>
+
+  <script>
+    // Keep the resend form's roll in sync with whatever is typed above
+    document.querySelector('form[action="/auth/resend-otp"]').addEventListener('submit', function () {
+      this.querySelector('input[name="roll"]').value =
+        document.querySelector('form[action="/auth/verify-otp"] input[name="roll"]').value;
+    });
+  </script>
+</body>
+</html>

@@ -290,7 +290,7 @@ router.post('/users/new', requireAdmin, async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    await User.create({ name, email, password: hashed, role, department });
+    await User.create({ name, email: email.trim().toLowerCase(), password: hashed, role, department, verified: true });
 
     res.redirect('/admin/users');
   } catch (err) {

@@ -22,7 +22,7 @@ async function main() {
   }
 
   const hashed = await bcrypt.hash(password, 10);
-  await User.create({ name, email, password: hashed, role: 'admin' });
+  await User.create({ name, email: email.trim().toLowerCase(), password: hashed, role: 'admin', verified: true });
 
   console.log(`✅ Admin account created: ${email}`);
   process.exit(0);

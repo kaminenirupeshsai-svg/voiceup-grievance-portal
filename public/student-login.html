@@ -20,12 +20,16 @@
     <div class="auth-card">
       <div class="auth-icon"><i class="bi bi-mortarboard"></i></div>
       <h2>Student Login</h2>
-      <p class="lead">Access your dashboard &amp; track complaints</p>
+      <p class="lead">Log in with your roll number &amp; password</p>
+
+      <div id="verifiedBanner" style="display:none;border-radius:10px;padding:11px 14px;font-size:13.5px;margin-bottom:16px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0">
+        ✅ Account verified — you can log in now.
+      </div>
 
       <form method="POST" action="/auth/login-student">
         <div class="form-row">
-          <label>Email</label>
-          <input name="email" type="email" placeholder="student@college.edu" required>
+          <label>Roll Number</label>
+          <input name="roll" type="text" placeholder="eg: CS2201" required>
         </div>
         <div class="form-row">
           <label>Password</label>
@@ -41,5 +45,11 @@
       <a class="auth-back" href="/">← Back to Home</a>
     </div>
   </div>
+
+  <script>
+    if (new URLSearchParams(location.search).get("verified") === "1") {
+      document.getElementById("verifiedBanner").style.display = "block";
+    }
+  </script>
 </body>
 </html>
